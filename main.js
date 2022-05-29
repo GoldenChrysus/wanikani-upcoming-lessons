@@ -4,7 +4,7 @@
 // @description Shows section of upcoming radicals, kanji, and vocabulary on lessons page
 // @author      GoldenChrysus
 // @website     https://github.com/GoldenChrysus
-// @version     1.0.0
+// @version     1.1.3
 // @include     https://www.wanikani.com/lesson
 // @copyright   2018+, Patrick Golden
 // @license     MIT; http://opensource.org/licenses/MIT
@@ -82,8 +82,18 @@
 			let english   = item.meanings[0].meaning;
 
 			// Some radicals are custom-made by WaniKani or have no available text character, so they are rendered as images.
-			if (!character) {
-				character = "<i class='radical-" + english.toLowerCase() + "'></i>";
+			if (!character && item.character_images) {
+				let image = item.character_images[0].url;
+
+				for (const tmp_image of item.character_images) {
+					if (tmp_image.metadata.style_name === "32px") {
+						image = tmp_image.url;
+
+						break;
+					}
+				}
+
+				character = `<img src="${image}" alt="${english}" style="width: 0.8em; filter: invert(100%);"/>`;
 			}
 
 			let $element = $(
@@ -91,6 +101,7 @@
 					<a lang="ja" href="/radicals/${english}">${character}</a>
 				</li>`
 			);
+			//0.3em 0.4em 0.212em 0.4em
 
 			$radical_list.append($element);
 		}
@@ -278,7 +289,19 @@
 				continue;
 			}
 
+			item.data.sort_date = item.assignments.unlocked_at || item.assignments.started_at;
+
 			queue[item.object].push(item.data);
+		}
+
+		for (let type in queue) {
+			queue[type].sort((a, b) => {
+				if (a.level !== b.level) {
+					return (a.level < b.level) ? -1 : 1;
+				}
+
+				return (a.lesson_position < b.lesson_position) ? -1 : 1;
+			})
 		}
 
 		createHeader();
