@@ -101,7 +101,6 @@
 					<a lang="ja" href="/radicals/${english}">${character}</a>
 				</li>`
 			);
-			//0.3em 0.4em 0.212em 0.4em
 
 			$radical_list.append($element);
 		}
